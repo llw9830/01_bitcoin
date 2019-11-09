@@ -55,14 +55,25 @@ func NewBlock(data string, prevBloclHash []byte) *Block {
 
 // 3. 生成hash
 func (b *Block)SetHash () {
-	// 拼装数据
+	/*// 拼装数据
 	blockInfo := append(b.PrevHash, b.Data...)
 	blockInfo = append(blockInfo, Uint64oByte(b.Version)...)
 	blockInfo = append(blockInfo, b.PrevHash...)
 	blockInfo = append(blockInfo, b.MerkelRoot...)
 	blockInfo = append(blockInfo, Uint64oByte(b.TimeStamp)...)
 	blockInfo = append(blockInfo, Uint64oByte(b.Difficulty)...)
-	blockInfo = append(blockInfo, Uint64oByte(b.Nonce)...)
+	blockInfo = append(blockInfo, Uint64oByte(b.Nonce)...)*/
+	tmp := [][]byte{
+		b.PrevHash,
+		b.Data,
+		Uint64oByte(b.Version),
+		b.MerkelRoot,
+		Uint64oByte(b.TimeStamp),
+		Uint64oByte(b.Difficulty),
+		Uint64oByte(b.Nonce),
+	}
+	// 将二维的数组转为一维的
+	blockInfo := bytes.Join(tmp, []byte{})
 	// sha256
 	hash := sha256.Sum256(blockInfo)
 	b.Hash =  hash[:]
