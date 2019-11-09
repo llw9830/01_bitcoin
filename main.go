@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"crypto/sha256"
+	"fmt"
+)
 
 type Block struct {
 	PrevHash	[]byte
@@ -8,13 +11,24 @@ type Block struct {
 	Data 		[]byte
 }
 
+// 创建区块
 func NewBlock(data string, prevBloclHash []byte) *Block {
-	hash := Block{
+	block := Block{
 		PrevHash: prevBloclHash,
-		Hash:     []byte{}, // TODO
+		Hash:     []byte{},
 		Data:     []byte(data),
 	}
-	return &hash
+	block.SetHash()
+	return &block
+}
+
+// 3. 生成hash
+func (b *Block)SetHash () {
+	// 拼装数据
+	blockInfo := append(b.PrevHash, b.Data...)
+	// sha256
+	hash := sha256.Sum256(blockInfo)
+	b.Hash =  hash[:]
 }
 
 func main()  {
