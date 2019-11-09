@@ -1,21 +1,53 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"encoding/binary"
+	"log"
+	"time"
 )
-
+// 0.定义结构体
 type Block struct {
+	// 版本号
+	Version		uint64
+	// 前区块hash
 	PrevHash	[]byte
+	// Merker根
+	MerkelRoot	[]byte
+	// 时间戳
+	TimeStamp	uint64
+	// 难度值
+	Difficulty	uint64
+	// 随机数
+	Nonce		uint64
+
+	// 当前区块hash值
 	Hash 		[]byte
+	// 数据
 	Data 		[]byte
+}
+
+func Uint64oByte(num uint64) []byte {
+	var b bytes.Buffer
+	err := binary.Write(&b, binary.BigEndian, num)
+	if err != nil {
+		log.Panic(err)
+	}
+	return b.Bytes()
 }
 
 // 1.创建区块
 func NewBlock(data string, prevBloclHash []byte) *Block {
 	block := Block{
-		PrevHash: prevBloclHash,
-		Hash:     []byte{},
-		Data:     []byte(data),
+		Version:    00,
+		PrevHash:   prevBloclHash,
+		MerkelRoot: []byte{},
+		TimeStamp:  uint64(time.Now().Unix()),
+		Difficulty: 0,
+		Nonce:      0,
+		Hash:       []byte{},
+		Data:       []byte(data),
 	}
 	block.SetHash()
 	return &block
@@ -25,6 +57,12 @@ func NewBlock(data string, prevBloclHash []byte) *Block {
 func (b *Block)SetHash () {
 	// 拼装数据
 	blockInfo := append(b.PrevHash, b.Data...)
+	blockInfo = append(blockInfo, Uint64oByte(b.Version)...)
+	blockInfo = append(blockInfo, b.PrevHash...)
+	blockInfo = append(blockInfo, b.MerkelRoot...)
+	blockInfo = append(blockInfo, Uint64oByte(b.TimeStamp)...)
+	blockInfo = append(blockInfo, Uint64oByte(b.Difficulty)...)
+	blockInfo = append(blockInfo, Uint64oByte(b.Nonce)...)
 	// sha256
 	hash := sha256.Sum256(blockInfo)
 	b.Hash =  hash[:]
