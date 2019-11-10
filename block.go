@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"log"
 	"time"
@@ -49,32 +48,39 @@ func NewBlock(data string, prevBloclHash []byte) *Block {
 		Hash:       []byte{},
 		Data:       []byte(data),
 	}
-	block.SetHash()
+	//block.SetHash()
+	pow := NewProofOfWork(&block)
+	// 查找随机数，不停继续hash运算
+	hash, nonce := pow.Run()
+	// 工具挖矿结果对block进行更新补充
+	block.Hash = hash
+	block.Nonce = nonce
+
 	return &block
 }
-
-// 3. 生成hash
-func (b *Block)SetHash () {
-	/*// 拼装数据
-	blockInfo := append(b.PrevHash, b.Data...)
-	blockInfo = append(blockInfo, Uint64oByte(b.Version)...)
-	blockInfo = append(blockInfo, b.PrevHash...)
-	blockInfo = append(blockInfo, b.MerkelRoot...)
-	blockInfo = append(blockInfo, Uint64oByte(b.TimeStamp)...)
-	blockInfo = append(blockInfo, Uint64oByte(b.Difficulty)...)
-	blockInfo = append(blockInfo, Uint64oByte(b.Nonce)...)*/
-	tmp := [][]byte{
-		b.PrevHash,
-		b.Data,
-		Uint64oByte(b.Version),
-		b.MerkelRoot,
-		Uint64oByte(b.TimeStamp),
-		Uint64oByte(b.Difficulty),
-		Uint64oByte(b.Nonce),
-	}
-	// 将二维的数组转为一维的
-	blockInfo := bytes.Join(tmp, []byte{})
-	// sha256
-	hash := sha256.Sum256(blockInfo)
-	b.Hash =  hash[:]
-}
+//
+//// 3. 生成hash
+//func (b *Block)SetHash () {
+//	/*// 拼装数据
+//	blockInfo := append(b.PrevHash, b.Data...)
+//	blockInfo = append(blockInfo, Uint64oByte(b.Version)...)
+//	blockInfo = append(blockInfo, b.PrevHash...)
+//	blockInfo = append(blockInfo, b.MerkelRoot...)
+//	blockInfo = append(blockInfo, Uint64oByte(b.TimeStamp)...)
+//	blockInfo = append(blockInfo, Uint64oByte(b.Difficulty)...)
+//	blockInfo = append(blockInfo, Uint64oByte(b.Nonce)...)*/
+//	tmp := [][]byte{
+//		b.PrevHash,
+//		b.Data,
+//		Uint64oByte(b.Version),
+//		b.MerkelRoot,
+//		Uint64oByte(b.TimeStamp),
+//		Uint64oByte(b.Difficulty),
+//		Uint64oByte(b.Nonce),
+//	}
+//	// 将二维的数组转为一维的
+//	blockInfo := bytes.Join(tmp, []byte{})
+//	// sha256
+//	hash := sha256.Sum256(blockInfo)
+//	b.Hash =  hash[:]
+//}
