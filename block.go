@@ -55,7 +55,7 @@ func NewBlock(data string, prevBloclHash []byte) *Block {
 	// 工具挖矿结果对block进行更新补充
 	block.Hash = hash
 	block.Nonce = nonce
-
+	
 	return &block
 }
 //
