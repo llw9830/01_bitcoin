@@ -22,7 +22,7 @@ func NewBlcokChain() *BlockChain {
 	if err != nil {
 		log.Panic("打开数据库失败")
 	}
-	defer db.Close()
+	//defer db.Close()
 
 	// 操作数据库
 	db.Update(func(tx *bolt.Tx) error {
@@ -56,8 +56,25 @@ func GensisBlock() *Block {
 
 // 5. 添加区块
 func (bc *BlockChain) AddBlock (data string) {
-	/*// 前区快hash
-	prevHash := bc.blocks[len(bc.blocks)-1].Hash
-	// 添加到链中
-	bc.blocks = append(bc.blocks, NewBlock(data, prevHash))*/
+	// 前区快hash
+	db := bc.db
+	lastHash := bc.tail // 最后一个区块的hash
+
+	db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket == nil {
+			log.Panic("bucket 不应该为空！")
+		}
+
+		// a.创建新区块
+		block := NewBlock(data, lastHash)
+		// b.添加到区块链db中
+		bucket.Put(block.Hash, block.Serialize())
+		bucket.Put([]byte("LastHashKey"), block.Hash)
+
+		// 更新内存中的区块链
+		bc.tail = block.Hash
+
+		return  nil
+	})
 }
