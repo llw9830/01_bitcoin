@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/gob"
 	"log"
 	"time"
 )
@@ -59,11 +60,28 @@ func NewBlock(data string, prevBloclHash []byte) *Block {
 	return &block
 }
 
-func (b *Block)toByte() []byte  {
-	// TODO
-	return nil
+// 序列化
+func (block *Block)Serialize() []byte  {
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+	err := encoder.Encode(block)
+	if err != nil {
+		log.Panic("编码出错！", err)
+	}
+	return buffer.Bytes()
 }
 
+// 反序列化
+func Deserialize(data []byte) Block  {
+	// ============解码
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	var block Block
+	err := decoder.Decode(&block)
+	if err != nil {
+		log.Panic("解码出错！", err)
+	}
+	return block
+}
 
 //
 //// 3. 生成hash

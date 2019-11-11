@@ -35,9 +35,12 @@ func NewBlcokChain() *BlockChain {
 			// 创世快
 			block := GensisBlock()
 			// 写数据
-			bucket.Put(block.Hash, block.toByte())
+			bucket.Put(block.Hash, block.Serialize())
 			bucket.Put([]byte("LastHashKey"), block.Hash)
 			lastHashKey = block.Hash
+
+			// 测试序列化反序列化
+			//fmt.Printf( "block info : %s\n", Deserialize(bucket.Get(block.Hash)) )
 		} else {
 			lastHashKey = bucket.Get([]byte("LastHashKey"))
 		}
