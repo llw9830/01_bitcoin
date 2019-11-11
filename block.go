@@ -58,6 +58,13 @@ func NewBlock(data string, prevBloclHash []byte) *Block {
 	
 	return &block
 }
+
+func (b *Block)toByte() []byte  {
+	// TODO
+	return nil
+}
+
+
 //
 //// 3. 生成hash
 //func (b *Block)SetHash () {

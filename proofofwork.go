@@ -31,6 +31,7 @@ func (pow *ProofOfWork)Run () ([]byte, uint64) {
 	var nonce uint64
 	b := pow.block
 
+	fmt.Println("开始挖矿！")
 	for {
 		tmp := [][]byte{
 			b.PrevHash,
