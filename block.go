@@ -38,10 +38,10 @@ func Uint64oByte(num uint64) []byte {
 }
 
 // 1.创建区块
-func NewBlock(data string, prevBloclHash []byte) *Block {
+func NewBlock(data string, prevBlockHash []byte) *Block {
 	block := Block{
 		Version:    00,
-		PrevHash:   prevBloclHash,
+		PrevHash:   prevBlockHash,
 		MerkelRoot: []byte{},
 		TimeStamp:  uint64(time.Now().Unix()),
 		Difficulty: 0,
