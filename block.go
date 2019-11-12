@@ -25,7 +25,8 @@ type Block struct {
 	// 当前区块hash值
 	Hash 		[]byte
 	// 数据
-	Data 		[]byte
+	//Data 		[]byte
+	Transaction			[]*Transaction
 }
 
 func Uint64oByte(num uint64) []byte {
@@ -38,7 +39,7 @@ func Uint64oByte(num uint64) []byte {
 }
 
 // 1.创建区块
-func NewBlock(data string, prevBlockHash []byte) *Block {
+func NewBlock(txs []*Transaction, prevBlockHash []byte) *Block {
 	block := Block{
 		Version:    00,
 		PrevHash:   prevBlockHash,
@@ -47,8 +48,11 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 		Difficulty: 0,
 		Nonce:      0,
 		Hash:       []byte{},
-		Data:       []byte(data),
+		//Data:       []byte(data),
+		Transaction:			txs,
 	}
+	block.MerkelRoot = block.MakeMerkelRoot()
+
 	//block.SetHash()
 	pow := NewProofOfWork(&block)
 	// 查找随机数，不停继续hash运算
@@ -109,3 +113,9 @@ func Deserialize(data []byte) Block  {
 //	hash := sha256.Sum256(blockInfo)
 //	b.Hash =  hash[:]
 //}
+
+// 模拟梅克尔根，只做简单拼接，不做二叉树处理
+func (b *Block) MakeMerkelRoot () []byte {
+	// TODO
+	return []byte{}
+}

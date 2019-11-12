@@ -4,7 +4,7 @@ import "fmt"
 
 // 添加区块
 func (cli *CLI) AddBlock (data string)  {
-	cli.bc.AddBlock(data)
+	//cli.bc.AddBlock(data)
 }
 
 
@@ -24,7 +24,7 @@ func (cli *CLI) PrintBlockChain()  {
 		fmt.Printf("难度值(随便写的）: %d\n", block.Difficulty)
 		fmt.Printf("随机数 : %d\n", block.Nonce)
 		fmt.Printf("当前区块哈希值: %x\n", block.Hash)
-		fmt.Printf("区块数据 :%s\n", block.Data)
+		fmt.Printf("区块数据 :%s\n", block.Transaction[0].TXInputs[0].Sig)
 
 
 		if block.PrevHash == nil {
@@ -32,4 +32,13 @@ func (cli *CLI) PrintBlockChain()  {
 			break
 		}
 	}
+}
+
+func (cli *CLI) GetBalance (address string) {
+	utxos := cli.bc.FindUTXOs(address)
+	total := 0.0
+	for _, utxo := range utxos {
+		total += utxo.value
+	}
+	fmt.Printf("\"%s\" 的账户余额为： %f\n", address, total)
 }

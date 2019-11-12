@@ -35,12 +35,14 @@ func (pow *ProofOfWork)Run () ([]byte, uint64) {
 	for {
 		tmp := [][]byte{
 			b.PrevHash,
-			b.Data,
 			Uint64oByte(b.Version),
 			b.MerkelRoot,
 			Uint64oByte(b.TimeStamp),
 			Uint64oByte(b.Difficulty),
 			Uint64oByte(nonce),
+			// 只对区块头做hash，区块头通过MerkelRoot产生影响
+			//b.Data,
+
 		}
 		// 拼接数据
 		blockInfo := bytes.Join(tmp, []byte{})

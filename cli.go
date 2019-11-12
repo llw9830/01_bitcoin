@@ -10,8 +10,9 @@ type CLI struct {
 }
 
 const Usage  = `
-	addBlock --data DATA		"add data to BlockChain."
-	printChain					"print all BlockChain data."
+	addBlock --data DATA			"add data to BlockChain."
+	printChain						"print all BlockChain data."
+	getBalance --address ADDRESS	"获取指定地址余额"
 `
 
 func (cli *CLI) Run ()  {
@@ -29,6 +30,7 @@ func (cli *CLI) Run ()  {
 		if len(arge) == 4 &&  arge[2] == "--data" {
 			// a.获取数据 b.使用bc添加区块Addblock
 			data := arge[3]
+
 			cli.AddBlock(data)
 		} else  {
 			fmt.Printf("添加区块参数使用不当，请检查.\n")
@@ -37,6 +39,12 @@ func (cli *CLI) Run ()  {
 	case "printChain": // 打印数据
 		fmt.Println("打印区块")
 		cli.PrintBlockChain()
+	case "getBalance": // 打印数据
+		if len(arge) == 4 &&  arge[2] == "--address" {
+			// a.获取数据 b.使用bc添加区块Addblock
+			address := arge[3]
+			cli.GetBalance(address)
+		}
 	default:
 		fmt.Println("无效的命令, 请检查！")
 		fmt.Printf(Usage)
