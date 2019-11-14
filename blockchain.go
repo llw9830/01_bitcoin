@@ -54,7 +54,7 @@ func NewBlcokChain(address string) *BlockChain {
 
 // 定义一个创世快
 func GensisBlock(adderss string) *Block {
-	coinbase := NewCoinbaseTx(adderss, "这是一个创世快")
+	coinbase := NewCoinbaseTx(adderss, "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks")
 	return NewBlock([]*Transaction{coinbase}, []byte{})
 }
 
@@ -86,7 +86,62 @@ func (bc *BlockChain) AddBlock (txs []*Transaction) {
 // 找到指定地址的所有utxo
 func (bc *BlockChain) FindUTXOs (address string) []TXOutput {
 	var UTXO []TXOutput
-	// TODO
+
+	// map[交易id][]int64
+	spentOutput := make(map[string][]int64)
+
+	it := bc.NewIterator()
+	for {
+		// 1.遍历区块
+		block := it.Next()
+		// 2.遍历交易
+
+		for _, tx := range block.Transaction {
+			fmt.Printf("当前交易id：%x\n", tx.TXID)
+
+			OUTPUT:
+			// 3.遍历output,找到和自己相关的utxo
+			for i, output := range tx.TXOutputs {
+				fmt.Printf("current index：%d\n", i)
+
+				// map[2222] = []int64{0}
+				// map[3333] = []int64{0, 1}
+				if spentOutput[string(tx.TXID)] != nil {
+					for _,  j := range spentOutput[string(tx.TXID)] {
+						if int64(i) == j {
+							// 当前output已经消耗过不用添加
+							continue OUTPUT
+						}
+					}
+				}
+
+				// output和目标地址相同，添加到utxo中
+				if output.PutKeyHash == address {
+					UTXO = append(UTXO, output)
+				}
+			}
+
+			// 判断是否为挖矿交易，直接跳过
+			if !tx.IsCoinbase() {
+				// 4.遍历input， 找到自己花费过的utxo
+				for _, input := range tx.TXInputs {
+					// 判断当前input和目标（silas）是否一致，相同说明是silas消耗过的output，就加进来
+					if input.Sig == address {
+						indeArray := spentOutput[string(input.TXid)]
+						indeArray = append(indeArray, input.Index)
+					}
+				}
+			} else {
+				fmt.Println("这是coinbase,不做input遍历！")
+			}
+		}
+
+		if len(block.PrevHash) == 0 {
+			fmt.Println("区块遍历结束退出！")
+			break
+		}
+	}
+
 
 	return UTXO
 }

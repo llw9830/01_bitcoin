@@ -29,7 +29,7 @@ type TXInput struct {
 // 定义交易输出
 type TXOutput struct {
 	// 转账金额
-	value		float64
+	Value		float64
 	// 锁定脚本，用地址模拟
 	PutKeyHash 	string
 }
@@ -48,14 +48,31 @@ func (tx *Transaction) SetHash ()  {
 	tx.TXID = hash[:]
 }
 
+// 判断当前交易是否为挖矿交易
+func (tx *Transaction)IsCoinbase () bool {
+	// 1.交易input只有一个
+	// 2.交易id为空
+	// 3.交易index为-1
+	if len(tx.TXInputs) == 1 {
+		input := tx.TXInputs[0]
+		if input.Index != -1 && !bytes.Equal(input.TXid, []byte{}) {
+			return false
+		}
+	}
+	return true
+}
+
 // 2.提供创建交易的方法
-// 挖矿交易
 func NewCoinbaseTx(address string, data string) *Transaction {
 	// 挖矿交易特点：1.只有一个input；2.无需引用交易id；3.无需引用index
 	// 矿工由于挖矿时无需指定签名，所以这个sig字段可以由矿工自行填写数据，一般填写矿池名字
-	input := TXInput{[]byte{}, -1, data}
+	input := TXInput{
+		TXid:   []byte{},
+		Index:  -1,
+		Sig:    data,
+	}
 	output := TXOutput{
-		value:      reward,
+		Value:      reward,
 		PutKeyHash: address,
 	}
 	// 挖矿交易只有一个input和output
