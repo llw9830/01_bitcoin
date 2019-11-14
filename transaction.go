@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"fmt"
 	"log"
 )
 
@@ -53,16 +54,15 @@ func (tx *Transaction)IsCoinbase () bool {
 	// 1.交易input只有一个
 	// 2.交易id为空
 	// 3.交易index为-1
-	if len(tx.TXInputs) == 1 {
-		input := tx.TXInputs[0]
-		if input.Index != -1 && !bytes.Equal(input.TXid, []byte{}) {
-			return false
-		}
+	if len(tx.TXInputs) == 1 && len(tx.TXInputs[0].TXid) == 0 && tx.TXInputs[0].Index == -1 {
+		return true
 	}
-	return true
+	return false
 }
 
 // 2.提供创建交易的方法
+
+// 3.创建挖矿交易
 func NewCoinbaseTx(address string, data string) *Transaction {
 	// 挖矿交易特点：1.只有一个input；2.无需引用交易id；3.无需引用index
 	// 矿工由于挖矿时无需指定签名，所以这个sig字段可以由矿工自行填写数据，一般填写矿池名字
@@ -85,7 +85,43 @@ func NewCoinbaseTx(address string, data string) *Transaction {
 	return tx
 }
 
-// 3.创建挖矿交易
+// 创建普通的转账方法
+// 3.创建outputs
+// 4.如果有零钱要找零
+func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transaction { // amount转账金额
+	// 1.找到合理的UTXO集合 map[string]uint64
+	utxos, resValue := bc.FindNeedUTXOs(from , amount)
+
+	if resValue < amount {
+		fmt.Printf("余额不足，交易失败。")
+		return nil
+	}
+
+	var inputs 		[]TXInput
+	var outputs 	[]TXOutput
+
+	// 2.时间交易输入,将这些UTXO转为input
+	for id, indexArray := range utxos {
+		for _, i := range indexArray {
+			input := TXInput{[]byte(id), int64(i), from}
+			inputs = append(inputs, input)
+		}
+	}
+
+	// 创建能交易输入
+	ouput := TXOutput{Value: amount, PutKeyHash: to}
+	outputs = append(outputs, ouput)
+
+	// 找零
+	if resValue > amount {
+		outputs = append(outputs, TXOutput{resValue - amount, from})
+	}
+
+	tx := &Transaction{TXID: []byte{},	TXInputs: inputs, TXOutputs: outputs}
+	tx.SetHash()
+	return tx
+}
+
 
 
 // 4.根据交易调整程序
