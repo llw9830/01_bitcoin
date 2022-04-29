@@ -5,7 +5,7 @@ import "fmt"
 // 添加区块
 func (cli *CLI) AddBlock (data string)  {
 	cli.bc.AddBlock(data)
-}
+} 
 
 
 // 打印区块
